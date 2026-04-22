@@ -15,6 +15,7 @@ export function Sidebar({ activeTab, setActiveTab }) {
     { id: 'books', icon: '📚', label: 'Acervo de Livros' },
     { id: 'loans', icon: '🔄', label: 'Locações' },
     { id: 'users', icon: '👥', label: 'Usuários' },
+    { id: 'courses', icon: '📋', label: 'Cursos' },
   ];
 
   const operatorNav = [
@@ -23,6 +24,7 @@ export function Sidebar({ activeTab, setActiveTab }) {
     { id: 'loans', icon: '🔄', label: 'Gerenciar Locações' },
     { id: 'books', icon: '📚', label: 'Acervo' },
     { id: 'users', icon: '👥', label: 'Alunos' },
+    { id: 'courses', icon: '📋', label: 'Cursos' },
   ];
 
   const studentNav = [
