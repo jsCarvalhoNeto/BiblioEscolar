@@ -5,6 +5,7 @@ import { DashboardStats } from '../components/dashboard/DashboardStats';
 import { RecentLoans } from '../components/dashboard/RecentLoans';
 import { BookSearchPanel } from '../components/operator/BookSearchPanel';
 import { LoansManagementPanel } from '../components/operator/LoansManagementPanel';
+import { ReportsPanel } from '../components/operator/ReportsPanel';
 import { BooksPanel } from '../components/shared/BooksPanel';
 import { UsersPanel } from '../components/admin/UsersPanel';
 import { CoursesPanel } from '../components/admin/CoursesPanel';
@@ -29,6 +30,7 @@ function AdminDashboard({ tab, setTab, toast }) {
         )}
         {tab === 'books' && <BooksPanel toast={toast} isAdmin />}
         {tab === 'loans' && <LoansManagementPanel toast={toast} />}
+        {tab === 'reports' && <ReportsPanel toast={toast} />}
         {tab === 'users' && <UsersPanel toast={toast} />}
         {tab === 'courses' && <CoursesPanel toast={toast} />}
       </main>
@@ -53,6 +55,7 @@ function OperatorDashboard({ tab, setTab, toast }) {
         )}
         {tab === 'search' && <BookSearchPanel toast={toast} />}
         {tab === 'loans' && <LoansManagementPanel toast={toast} />}
+        {tab === 'reports' && <ReportsPanel toast={toast} />}
         {tab === 'books' && <BooksPanel toast={toast} isAdmin={false} />}
         {tab === 'users' && <UsersPanel toast={toast} />}
         {tab === 'courses' && <CoursesPanel toast={toast} />}

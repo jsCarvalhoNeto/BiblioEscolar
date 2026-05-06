@@ -69,7 +69,7 @@ export function LoansManagementPanel({ toast }) {
     setLoading(true);
     let query = supabase
       .from('loans')
-      .select('*, book:books(title, author, tombstone_number, shelf_location)')
+      .select('*, book:books(title, author, tombstone_number, shelf_location), operator:profiles!operator_id(full_name)')
       .order('loan_date', { ascending: false });
 
     if (filter !== 'all') query = query.eq('status', filter);
@@ -142,6 +142,7 @@ export function LoansManagementPanel({ toast }) {
                 <tr>
                   <th>Livro</th>
                   <th>Aluno</th>
+                  <th>Operador</th>
                   <th>Tombo</th>
                   <th>Estante</th>
                   <th>Empréstimo</th>
@@ -163,6 +164,7 @@ export function LoansManagementPanel({ toast }) {
                         <small style={{ color: 'var(--color-text-muted)' }}>{loan.book?.author}</small>
                       </td>
                       <td>{loan.student_name}</td>
+                      <td style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{loan.operator?.full_name?.split(' ')[0] || '-'}</td>
                       <td><span className="badge badge-blue">{loan.book?.tombstone_number}</span></td>
                       <td><span className="book-meta-item shelf-tag" style={{ fontSize: '0.75rem' }}>📍 {loan.book?.shelf_location}</span></td>
                       <td>{formatDate(loan.loan_date)}</td>

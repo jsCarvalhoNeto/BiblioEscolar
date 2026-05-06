@@ -14,6 +14,7 @@ export function Sidebar({ activeTab, setActiveTab }) {
     { id: 'dashboard', icon: '📊', label: 'Dashboard' },
     { id: 'books', icon: '📚', label: 'Acervo de Livros' },
     { id: 'loans', icon: '🔄', label: 'Locações' },
+    { id: 'reports', icon: '📈', label: 'Relatórios' },
     { id: 'users', icon: '👥', label: 'Usuários' },
     { id: 'courses', icon: '📋', label: 'Cursos' },
   ];
@@ -22,6 +23,7 @@ export function Sidebar({ activeTab, setActiveTab }) {
     { id: 'dashboard', icon: '📊', label: 'Dashboard' },
     { id: 'search', icon: '🔍', label: 'Buscar Livros' },
     { id: 'loans', icon: '🔄', label: 'Gerenciar Locações' },
+    { id: 'reports', icon: '📈', label: 'Relatórios' },
     { id: 'books', icon: '📚', label: 'Acervo' },
     { id: 'users', icon: '👥', label: 'Alunos' },
     { id: 'courses', icon: '📋', label: 'Cursos' },

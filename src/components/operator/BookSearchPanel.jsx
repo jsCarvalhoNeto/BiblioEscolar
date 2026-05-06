@@ -70,20 +70,39 @@ function BookResultCard({ book, onSelect, onEdit, onDelete, canManage }) {
 function LoanModal({ book, onClose, onSuccess, toast }) {
   const { profile } = useAuth();
   const [studentName, setStudentName] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const defaultDueDate = new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
+  const [dueDate, setDueDate] = useState(defaultDueDate);
   const [obs, setObs] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [students, setStudents] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(true);
 
   // Data atual e data mínima de devolução (amanhã)
   const today = new Date().toISOString().split('T')[0];
   const minDue = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
+  useEffect(() => {
+    async function loadStudents() {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, enrollment_number, email, class_year, courses(name)')
+        .eq('role', 'student')
+        .order('full_name');
+      setStudents(data ?? []);
+      setLoadingStudents(false);
+    }
+    loadStudents();
+  }, []);
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!studentName.trim()) return;
     setLoading(true);
+    const selectedStudent = students.find(s => s.full_name === studentName.trim());
     const { error } = await supabase.from('loans').insert({
       book_id: book.id,
+      student_id: selectedStudent ? selectedStudent.id : null,
       student_name: studentName.trim(),
       operator_id: profile.id,
       loan_date: today,
@@ -126,18 +145,48 @@ function LoanModal({ book, onClose, onSuccess, toast }) {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label" htmlFor="loan-student-name">Nome Completo do Aluno *</label>
-            <input
+            <label className="form-label" htmlFor="loan-student-name">Selecione o Aluno *</label>
+            <select
               id="loan-student-name"
-              type="text"
               className="form-input"
-              placeholder="Ex: João Carlos da Silva"
               value={studentName}
               onChange={e => setStudentName(e.target.value)}
               required
-              autoFocus
-            />
+              disabled={loadingStudents}
+            >
+              <option value="">
+                {loadingStudents ? 'Carregando alunos...' : 'Selecione um aluno da lista'}
+              </option>
+              {students.map(student => (
+                <option key={student.id} value={student.full_name}>
+                  {student.full_name} {student.enrollment_number ? `(Matrícula: ${student.enrollment_number})` : ''}
+                </option>
+              ))}
+            </select>
           </div>
+
+          {studentName && students.find(s => s.full_name === studentName) && (() => {
+            const selectedStudent = students.find(s => s.full_name === studentName);
+            return (
+              <div style={{
+                background: 'var(--color-bg-subtle)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                padding: '12px 16px',
+                marginTop: '-8px',
+                marginBottom: '16px',
+                fontSize: '0.85rem',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '8px'
+              }}>
+                <div><strong style={{color: 'var(--color-text-muted)'}}>Matrícula:</strong><br/>{selectedStudent.enrollment_number || '-'}</div>
+                <div><strong style={{color: 'var(--color-text-muted)'}}>E-mail:</strong><br/>{selectedStudent.email || '-'}</div>
+                <div><strong style={{color: 'var(--color-text-muted)'}}>Turma:</strong><br/>{selectedStudent.class_year || '-'}</div>
+                <div><strong style={{color: 'var(--color-text-muted)'}}>Curso:</strong><br/>{selectedStudent.courses?.name || '-'}</div>
+              </div>
+            );
+          })()}
 
           <div className="loan-dates-row">
             <div className="form-group">

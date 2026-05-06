@@ -18,18 +18,18 @@ function CourseFormModal({ course, onClose, onSave, toast }) {
           .update({ name: name.trim(), active, updated_at: new Date().toISOString() })
           .eq('id', course.id);
         if (error) throw error;
-        toast?.success('Curso atualizado com sucesso!');
+        if (toast) toast('Curso atualizado com sucesso!', 'success');
       } else {
         const { error } = await supabase
           .from('courses')
           .insert({ name: name.trim(), active });
         if (error) throw error;
-        toast?.success('Curso cadastrado com sucesso!');
+        if (toast) toast('Curso cadastrado com sucesso!', 'success');
       }
       onSave();
     } catch (err) {
       console.error(err);
-      toast?.error(err.message.includes('unique') ? 'Já existe um curso com esse nome.' : 'Erro ao salvar curso: ' + err.message);
+      if (toast) toast(err.message.includes('unique') ? 'Já existe um curso com esse nome.' : 'Erro ao salvar curso: ' + err.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -149,11 +149,11 @@ export function CoursesPanel({ toast }) {
     try {
       const { error } = await supabase.from('courses').delete().eq('id', deletingCourse.id);
       if (error) throw error;
-      toast?.success('Curso excluído com sucesso!');
+      if (toast) toast('Curso excluído com sucesso!', 'success');
       setDeletingCourse(null);
       loadCourses();
     } catch (err) {
-      toast?.error('Erro ao excluir curso: ' + err.message);
+      if (toast) toast('Erro ao excluir curso: ' + err.message, 'error');
     } finally {
       setDeleting(false);
     }

@@ -76,11 +76,11 @@ function CreateStudentModal({ onClose, onSave, toast }) {
 
       if (profileError) throw profileError;
 
-      toast?.success('Aluno cadastrado com sucesso! Senha padrão: Alterar@123');
+      if (toast) toast('Aluno cadastrado com sucesso! Senha padrão: Alterar@123', 'success');
       onSave();
     } catch (err) {
       console.error(err);
-      toast?.error('Erro ao cadastrar aluno: ' + err.message);
+      if (toast) toast('Erro ao cadastrar aluno: ' + err.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -226,11 +226,11 @@ function EditUserModal({ user, onClose, onSave, toast, isOperator }) {
 
       if (error) throw error;
 
-      toast?.success('Usuário atualizado com sucesso!');
+      if (toast) toast('Usuário atualizado com sucesso!', 'success');
       onSave();
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
-      toast?.error('Erro ao atualizar usuário: ' + error.message);
+      if (toast) toast('Erro ao atualizar usuário: ' + error.message, 'error');
     } finally {
       setSaving(false);
     }
