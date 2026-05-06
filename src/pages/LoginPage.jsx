@@ -17,7 +17,9 @@ export function LoginPage() {
     setLoading(true);
     const { error: signInError } = await signIn(email, password);
     if (signInError) {
-      if (signInError.message?.includes('email_provider_disabled') || signInError.code === 'email_provider_disabled') {
+      if (signInError.status === 429 || signInError.message?.includes('rate limit')) {
+        setError('Muitas tentativas de login ou abas abertas. Por favor, feche outras abas do sistema e aguarde alguns minutos antes de tentar novamente.');
+      } else if (signInError.message?.includes('email_provider_disabled') || signInError.code === 'email_provider_disabled') {
         setError('Login por e-mail está desabilitado no servidor. Contate o administrador do sistema.');
       } else if (signInError.message?.includes('Invalid login credentials') || signInError.status === 400) {
         setError('E-mail ou senha inválidos. Verifique os dados e tente novamente.');
