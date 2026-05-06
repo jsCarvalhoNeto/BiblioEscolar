@@ -1,13 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import './index.css';
 
+// Timeout de segurança: se ficar mais de 12s em loading, mostra opção de retry
+const LOADING_TIMEOUT_MS = 12000;
+
 function AppContent() {
   const { user, profile, loading, error, signOut } = useAuth();
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setLoadingTimedOut(true);
+    }, LOADING_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   if (loading) {
+    if (loadingTimedOut) {
+      return (
+        <div className="loading-overlay" style={{ minHeight: '100vh', flexDirection: 'column', gap: 16, padding: 20, textAlign: 'center' }}>
+          <div style={{ fontSize: '2.5rem' }}>⚠️</div>
+          <h2 style={{ color: 'var(--color-danger)' }}>Conexão Lenta</h2>
+          <p style={{ maxWidth: 360, color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+            O servidor está demorando para responder. Verifique sua conexão e tente novamente.
+          </p>
+          <button className="btn btn-primary" onClick={() => window.location.reload()}>
+            🔄 Tentar Novamente
+          </button>
+        </div>
+      );
+    }
     return (
       <div className="loading-overlay" style={{ minHeight: '100vh', flexDirection: 'column', gap: 16 }}>
         <div style={{ fontSize: '2.5rem' }}>📚</div>
@@ -46,3 +75,4 @@ function App() {
 }
 
 export default App;
+

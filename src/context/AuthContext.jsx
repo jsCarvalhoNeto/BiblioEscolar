@@ -11,38 +11,21 @@ export function AuthProvider({ children }) {
   
   // Ref para controlar se já estamos buscando o perfil (evita chamadas duplicadas)
   const fetchingRef = useRef(false);
+  // Ref para guardar o ID do último usuário buscado (evita re-buscas desnecessárias)
+  const lastFetchedUserIdRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
 
-    async function handleAuthChange(event, session) {
-      if (!mounted) return;
-
-      console.log(`[Auth] Evento: ${event}`);
-
-      if (!session?.user) {
-        // Usuário deslogado
-        setUser(null);
-        setProfile(null);
-        setAuthError(null);
-        setLoading(false);
-        return;
-      }
-
-      // Usuário autenticado
-      const currentUser = session.user;
-      setUser(currentUser);
-
-      // Para TOKEN_REFRESHED, não precisamos rebuscar o perfil se já temos
-      // Mas para INITIAL_SESSION e SIGNED_IN, sempre buscamos
-      if (event === 'TOKEN_REFRESHED') {
-        // Apenas garantimos que não estamos mais em loading
-        setLoading(false);
-        return;
-      }
-
-      // Evita buscas duplicadas paralelas
+    async function fetchUserProfile(currentUser) {
+      // Se já estamos buscando, ignora
       if (fetchingRef.current) return;
+      // Se já buscamos para este mesmo usuário e já temos perfil, não busca de novo
+      if (lastFetchedUserIdRef.current === currentUser.id) {
+        setLoading(false);
+        return;
+      }
+
       fetchingRef.current = true;
       setLoading(true);
 
@@ -63,21 +46,59 @@ export function AuthProvider({ children }) {
               : `Erro ao carregar perfil: ${profileError.message}`
           );
           setProfile(null);
+          lastFetchedUserIdRef.current = null;
         } else {
           setProfile(data);
           setAuthError(null);
+          // Registra que já buscamos para este usuário
+          lastFetchedUserIdRef.current = currentUser.id;
         }
       } catch (err) {
         if (!mounted) return;
         console.error('[Auth] Erro inesperado:', err);
         setAuthError('Erro inesperado ao acessar o sistema.');
         setProfile(null);
+        lastFetchedUserIdRef.current = null;
       } finally {
         if (mounted) {
           setLoading(false);
           fetchingRef.current = false;
         }
       }
+    }
+
+    async function handleAuthChange(event, session) {
+      if (!mounted) return;
+
+      console.log(`[Auth] Evento: ${event}`);
+
+      if (!session?.user) {
+        // Usuário deslogado — limpa tudo
+        setUser(null);
+        setProfile(null);
+        setAuthError(null);
+        lastFetchedUserIdRef.current = null;
+        setLoading(false);
+        return;
+      }
+
+      const currentUser = session.user;
+      setUser(currentUser);
+
+      if (event === 'TOKEN_REFRESHED') {
+        // Token renovado: não rebusca o perfil se já temos para este usuário
+        // mas se por algum motivo o perfil está vazio, recarrega
+        if (lastFetchedUserIdRef.current === currentUser.id) {
+          setLoading(false);
+          return;
+        }
+        // Perfil não carregado ainda (ex: primeiro acesso após cache), busca agora
+        await fetchUserProfile(currentUser);
+        return;
+      }
+
+      // INITIAL_SESSION ou SIGNED_IN: busca o perfil
+      await fetchUserProfile(currentUser);
     }
 
     // onAuthStateChange dispara INITIAL_SESSION automaticamente no mount
