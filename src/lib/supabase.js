@@ -5,13 +5,14 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    // Persiste a sessão no localStorage (padrão, mas explícito)
+    // Persiste a sessão no localStorage entre recarregamentos
     persistSession: true,
-    // Detecta automaticamente a sessão na aba/dispositivo
+    // Não tenta detectar sessão na URL (evita comportamentos inesperados)
     detectSessionInUrl: false,
-    // Renova o token automaticamente (mas com controle)
+    // Renova o token automaticamente quando próximo de expirar
     autoRefreshToken: true,
-    // Armazena a sessão localmente para evitar re-autenticações
-    storageKey: 'biblioescolar-auth',
+    // IMPORTANTE: não customizar storageKey — o lock interno do Supabase
+    // usa o ID do projeto no nome, e um storageKey diferente pode causar
+    // conflito entre o nome da chave e o nome do lock
   },
 });
